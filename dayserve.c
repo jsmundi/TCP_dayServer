@@ -29,7 +29,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define MY_PORT_NUMBER 11899 //Dayserve port
+#define MY_PORT_NUMBER 49999 //Dayserve port
 
 /* Create the inteface for new communicatin end point */
 int makeSocket()
