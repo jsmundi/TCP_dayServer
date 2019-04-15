@@ -90,7 +90,7 @@ int main(int argc, char const *argv[])
     int connectfd;
     char serverResponse[512];
 
-    if (argc != 3)
+    if (argc != 2)
     {
         perror("Not enough arguments: ");
         exit(EXIT_FAILURE);
