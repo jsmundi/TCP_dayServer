@@ -103,6 +103,11 @@ int connectSocket(int listenFD)
 
     //Get the host name
     hostEntry = gethostbyaddr(&(clientAddr.sin_addr), sizeof(struct in_addr), AF_INET);
+    if (hostEntry == NULL)
+    {
+        herror("Host Name");
+        exit(EXIT_FAILURE);
+    }
     hostName = hostEntry->h_name;
     if (hostName == NULL)
     {
@@ -144,7 +149,7 @@ int main(int argc, char const *argv[])
     //Keep listening for connection requests
     while (1)
     {
-        //Make connection 
+        //Make connection
         connectfd = connectSocket(listenfd);
 
         //Create a connection with client
