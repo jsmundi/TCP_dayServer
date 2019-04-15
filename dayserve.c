@@ -94,7 +94,7 @@ int connectSocket(int listenFD)
 
     //Takes Socket ID, Foreign Client address, Addres len size of name.
     //and return connection descriptor
-    connectFD = accept(listenFD, (struct sockaddr *)&clientAddr, &length);
+    connectFD = accept(listenFD, (struct sockaddr *)&clientAddr, (socklen_t *)&length);
     if (connectFD < 0)
     {
         perror("Connect error: ");
@@ -111,11 +111,10 @@ int connectSocket(int listenFD)
     }
 
     //Print message
-    printf("Connected to host name: %s at port %d\n", getHostName(clientAddr), MY_PORT_NUMBER);
+    printf("Connected to host name: %s at port %d\n", hostName, MY_PORT_NUMBER);
 
     return connectFD;
 }
-
 
 /* Return the current date and time*/
 char *getDateTime()
@@ -140,11 +139,16 @@ int main(int argc, char const *argv[])
     //Start listening
     listenSocket(listenfd);
 
+    printf("Server started now listening at port: %d\n", MY_PORT_NUMBER);
+
     //Keep listening for connection requests
     while (1)
     {
+        //Make connection 
+        connectfd = connectSocket(listenfd);
+
         //Create a connection with client
-        if ((connectfd = connectSocket) < 0)
+        if (connectfd < 0)
         {
             perror("Connect error: ");
             exit(EXIT_FAILURE);
@@ -165,7 +169,7 @@ int main(int argc, char const *argv[])
         else
         {
             char *dateTime = getDateTime();
-            if ((write(connectfd, dateTime, strlne(dateTime))) < 0)
+            if ((write(connectfd, dateTime, strlen(dateTime))) < 0)
             {
                 perror("Write error: ");
                 exit(EXIT_FAILURE);
