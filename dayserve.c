@@ -129,7 +129,7 @@ char *getDateTime()
     return ctime(&currTimeDate);
 }
 
-int main(int argc, char const *argv[])
+int main(void)
 {
     int listenfd;     //Socket descriptor
     int connectfd;    //Connection descriptor
@@ -173,7 +173,10 @@ int main(int argc, char const *argv[])
         }
         else
         {
+            //Get date and time 
             char *dateTime = getDateTime();
+
+            //Write to client 
             if ((write(connectfd, dateTime, strlen(dateTime))) < 0)
             {
                 perror("Write error: ");

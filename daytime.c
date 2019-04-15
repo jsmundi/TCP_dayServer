@@ -73,9 +73,11 @@ void setUpServer(int socketFD, char *userHost)
         exit(EXIT_FAILURE);
     }
 
+    //Magic
     pptr = (struct in_addr **)hostEntry->h_addr_list;
     memcpy(&servAddr.sin_addr, *pptr, sizeof(struct in_addr));
 
+    //Connect to the server address
     if ((connectFD = (connect(socketFD, (struct sockaddr *)&servAddr, sizeof(servAddr)))) < 0)
     {
         perror("Connection error: ");
@@ -83,11 +85,10 @@ void setUpServer(int socketFD, char *userHost)
     }
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     /* Make an Internet socket using TCP protocol */
     int socketfd;
-    int connectfd;
     char serverResponse[512];
 
     if (argc != 2)
@@ -97,10 +98,15 @@ int main(int argc, char const *argv[])
     }
     else
     {
+        //Create socket
         socketfd = makeSocket();
+        //Setup the connection with server
         setUpServer(socketfd, argv[1]);
+        //Read from server 
         read(socketfd, serverResponse, 512);
+        //Print response to stdout
         printf("%s", serverResponse);
+        //Close socket
         close(socketfd);
         return 0;
     }
