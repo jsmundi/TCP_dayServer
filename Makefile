@@ -11,8 +11,8 @@ Client: daytime.c
 
 clean: 
 	rm Client Server 
-	rm Client.dSYM
-	rm Server.dSYM
+	rm -rf Client.dSYM
+	rm -rf Server.dSYM
 
-run:
+run: all
 	./Client localhost
