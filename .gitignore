@@ -53,3 +53,5 @@ dkms.conf
 .vscode/*
 Client
 Server
+.DS_Store
+a9.zip
