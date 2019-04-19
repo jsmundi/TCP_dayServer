@@ -28,8 +28,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/wait.h>
 
-#define MY_PORT_NUMBER 11899 //Dayserve port
+#define MY_PORT_NUMBER 49999 //Dayserve port
 
 /* Create the inteface for new communicatin end point */
 int makeSocket()
@@ -149,6 +150,8 @@ int main(void)
     //Keep listening for connection requests
     while (1)
     {
+        waitpid(-1, NULL, WNOHANG);
+
         //Make connection
         connectfd = connectSocket(listenfd);
 
@@ -166,12 +169,7 @@ int main(void)
             exit(EXIT_FAILURE);
         }
 
-        if (processPID)
-        {
-            //Close the connection
-            close(connectfd);
-        }
-        else
+        if (processPID == 0)
         {
             //Get date and time 
             char *dateTime = getDateTime();
@@ -183,6 +181,12 @@ int main(void)
                 exit(EXIT_FAILURE);
             }
             exit(EXIT_SUCCESS);
+           
+        }
+        else
+        {
+             //Close the connection
+            close(connectfd);
         }
     }
 
