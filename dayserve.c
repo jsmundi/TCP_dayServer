@@ -40,7 +40,8 @@ int makeSocket()
 
     /*
      * AF_INET communication domain (IPV4 Family)
-     * SOCK_STREAM communciation typereliable, 2-way, connection-based service
+     * SOCK_STREAM communciation typereliable, 2-way, connection-based service.
+     * SOCK_STREAM ensures that data is not lost or duplicated.
      */
     tempListFD = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -62,9 +63,20 @@ void bindSocket(int listenFD)
     //Create memory for server address to bind
     memset(&servAddr, 0, sizeof(servAddr));
 
+    /* 
+     * The htons function converts a u_short from host to TCP/IP 
+     * network byte order (which is big-endian).
+     */
     servAddr.sin_family = AF_INET;                //IPV4 Family
-    servAddr.sin_port = htons(MY_PORT_NUMBER);    //Port Number
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //Internet address
+    servAddr.sin_port = htons(MY_PORT_NUMBER);    //A 16-bit port number in Network Byte Order. Big Endian
+    servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //A 32-bit IP address in Network Byte Order. Big Endian
+
+    /*
+     * The bind() function binds a unique local name to the socket with descriptor socket.
+     * listenFD: The socket descriptor returned by a previous makeSocket() call.
+     * servAddr: The pointer to a sockaddr structure containing the name that is to be bound to socket.
+     * servAddr: The size of address in bytes.
+     */
     if (bind(listenFD, (struct sockaddr *)&servAddr, sizeof(servAddr)) < 0)
     {
         perror("Bind error: ");
@@ -75,7 +87,12 @@ void bindSocket(int listenFD)
 /* Instructs TCP protocol implementation to listen for connections */
 void listenSocket(int listenFD)
 {
-    //Takes in Socket ID and active participants that can “wait” for a connection.
+    /* 
+     * listen completes the binding necessary for a socket listeFD, 
+     * if bind() has not been called for s, and it creates a connection 
+     * request queue of length backlog to queue incoming connection requests. 
+     * When the queue is full, additional connection requests are ignored.
+     */
     if (listen(listenFD, 1) < 0)
     {
         perror("Bind error: ");
@@ -93,8 +110,17 @@ int connectSocket(int listenFD)
 
     int length = sizeof(struct sockaddr_in);
 
-    //Takes Socket ID, Foreign Client address, Addres len size of name.
-    //and return connection descriptor
+    /* 
+     * accept() a connection request from a client. 
+     * The call accepts the first connection on its queue of pending connections. 
+     * The accept() call creates a new socket descriptor with the same properties as listenFD
+     * and returns it to the caller. If the queue has no pending connection requests, accept() blocks
+     * the caller unless s is in nonblocking mode. 
+     * 
+     * listenFD: The socket descriptor.
+     * clientAddr: The socket address of the connecting client that is filled by accept() before it returns. 
+     * length: size in bytes of the storage pointed to by addr
+     */
     connectFD = accept(listenFD, (struct sockaddr *)&clientAddr, (socklen_t *)&length);
     if (connectFD < 0)
     {
@@ -102,17 +128,24 @@ int connectSocket(int listenFD)
         exit(EXIT_FAILURE);
     }
 
-    //Get the host name
+    /* 
+     * Resolve the host name related to IP address 
+     * clientAddr.sin_addr: Points to an unsigned long value containing the address of the host
+     */
     hostEntry = gethostbyaddr(&(clientAddr.sin_addr), sizeof(struct in_addr), AF_INET);
     if (hostEntry == NULL)
     {
-        herror("Host Name");
+        herror("Error Host Entry: ");
         exit(EXIT_FAILURE);
     }
+
+    //The address of the official name of the host
     hostName = hostEntry->h_name;
+
+    //Error check for host name
     if (hostName == NULL)
     {
-        herror("Host Name");
+        herror("Error Host Name: ");
         exit(EXIT_FAILURE);
     }
 
@@ -171,15 +204,17 @@ int main(void)
 
         if (processPID == 0)
         {
-            //Get date and time 
+            //Get date and time
             char *dateTime = getDateTime();
 
-            //Write to client 
+            //Write to client
             if ((write(connectfd, dateTime, strlen(dateTime))) < 0)
             {
                 perror("Write error: ");
                 exit(EXIT_FAILURE);
             }
+
+            //Exit
             exit(EXIT_SUCCESS);
            
         }
